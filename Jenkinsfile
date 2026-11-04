@@ -28,6 +28,36 @@ pipeline {
                    docker build -t jenkins-automation .
                 '''
             }
+            stage('ECR Login') {
+            steps {
+                sh '''
+                aws ecr get-login-password \
+                --region $AWS_REGION | docker login \
+                --username AWS \
+                --password-stdin \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                '''
+            }
+        }
+
+        stage('Tag Image') {
+            steps {
+                sh '''
+                docker tag \
+                jenkins-automation:latest \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+                '''
+            }
+        }
+
+        stage('Push Image') {
+            steps {
+                sh '''
+                docker push \
+                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+                '''
+            }
+        }
         }
 
     }
