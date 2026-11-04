@@ -28,6 +28,7 @@ pipeline {
                    docker build -t jenkins-automation .
                 '''
             }
+        }
             stage('ECR Login') {
             steps {
                 sh '''
@@ -61,4 +62,3 @@ pipeline {
         }
 
     }
-}
