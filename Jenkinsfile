@@ -1,6 +1,11 @@
 pipeline {
-
     agent any
+
+    environment {
+        AWS_REGION = 'ap-south-1'
+        AWS_ACCOUNT_ID = 'YOUR_ACCOUNT_ID'
+        ECR_REPO = 'jenkins-automation'
+    }
 
     stages {
 
@@ -25,18 +30,29 @@ pipeline {
         stage('Docker Build') {
             steps {
                 sh '''
-                   docker build -t jenkins-automation .
+                    docker build -t jenkins-automation .
                 '''
             }
         }
-            stage('ECR Login') {
+
+        stage('Debug Environment') {
             steps {
                 sh '''
-                aws ecr get-login-password \
-                --region $AWS_REGION | docker login \
-                --username AWS \
-                --password-stdin \
-                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+                    echo REGION=$AWS_REGION
+                    echo ACCOUNT=$AWS_ACCOUNT_ID
+                    echo REPO=$ECR_REPO
+                '''
+            }
+        }
+
+        stage('ECR Login') {
+            steps {
+                sh '''
+                    aws ecr get-login-password \
+                    --region $AWS_REGION | docker login \
+                    --username AWS \
+                    --password-stdin \
+                    $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
                 '''
             }
         }
@@ -44,9 +60,8 @@ pipeline {
         stage('Tag Image') {
             steps {
                 sh '''
-                docker tag \
-                jenkins-automation:latest \
-                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+                    docker tag jenkins-automation:latest \
+                    $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
                 '''
             }
         }
@@ -54,11 +69,10 @@ pipeline {
         stage('Push Image') {
             steps {
                 sh '''
-                docker push \
-                $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
+                    docker push \
+                    $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPO:latest
                 '''
             }
         }
-        }
-
     }
+}
