@@ -3,14 +3,17 @@ kind: Ingress
 
 metadata:
   name: my-app-ingress
+  namespace: springboot
+
+  annotations:
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
 
 spec:
-  ingressClassName: nginx
+  ingressClassName: alb
 
   rules:
-  - host: myapp.example.com
-
-    http:
+  - http:
       paths:
       - path: /
         pathType: Prefix
@@ -18,5 +21,6 @@ spec:
         backend:
           service:
             name: my-app-service
+
             port:
               number: 80

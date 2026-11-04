@@ -1,7 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
+
 metadata:
   name: my-app
+  namespace: springboot
 
 spec:
   replicas: 2
@@ -18,6 +20,31 @@ spec:
     spec:
       containers:
       - name: my-app
-        image: ramnadh/my-app:latest
+
+        image: 960717897785.dkr.ecr.ap-southeast-2.amazonaws.com/jenkins-automation:latest
+
         ports:
         - containerPort: 8800
+
+        resources:
+          requests:
+            cpu: "250m"
+            memory: "512Mi"
+
+          limits:
+            cpu: "500m"
+            memory: "1Gi"
+
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8800
+          initialDelaySeconds: 20
+          periodSeconds: 5
+
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8800
+          initialDelaySeconds: 60
+          periodSeconds: 10
